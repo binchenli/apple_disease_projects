@@ -1,4 +1,5 @@
 # ignored
 datas/
 .Rproj.user
-.mxd
+#ignore gis files
+gis/

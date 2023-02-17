@@ -24,8 +24,9 @@ disease_point<- read.csv("../../../datas/apple_diseases/apple_diseases_sdm/fu_la
                          header = TRUE, check.names = F)
 nrow(disease_point)
 presence_data <- filter(disease_point, infestation_percentage == 1)
+write.csv(presence_data,"./presence_data.csv", row.names = FALSE)
 absence_data <- filter(disease_point, infestation_percentage == 0)
-
+write.csv(absence_data,"./absence_data.csv", row.names = FALSE)
 #spatial points data frame
 
 coordinates(disease_point) <- ~ lon + lat
@@ -41,22 +42,22 @@ points(absence_data,cex=1,pch='*',col='black')
 #-----------------fit modes-----------------
 
 #only presence
-
+nrow(presence_data)
 d <- sdmData(infestation_percentage
              ~pre + tmn + tmx + tmp + hfp, disease_point,
-             predictors = bioc_hfp,bg = list(method='gRandom',n=2000))
+             predictors = bioc_hfp,bg = list(method='gRandom',n=1000))
 d
 #presence-absence
 
-d <- sdmData(infestation_percentage
-             ~pre + tmn + tmx + tmp + hfp, disease_point,
-             predictors = bioc_hfp)
-d
+# d <- sdmData(infestation_percentage
+#              ~pre + tmn + tmx + tmp + hfp, disease_point,
+#              predictors = bioc_hfp)
+# d
 
 # saving datas
 
 df <- as.data.frame(d) # train datas
-write.csv(df,"./data_valsce.csv", row.names = FALSE)
+write.csv(df,"./op_data_fu_lan_bing.csv", row.names = FALSE)
 
 # getmethodNames()
 m <- sdm(infestation_percentage ~pre + tmn + tmx + tmp + hfp, 
@@ -74,7 +75,7 @@ m
 gui(m)
 
 predictions <- predict(m,bioc_hfp,
-                       mean = T,filename ='all.img',overwrite=TRUE)
+                       mean = T,filename ='predictions_only_preesence.img',overwrite=TRUE)
 
 # predictions <- predict(m,bioc_hfp,species = 'rot',
 #                        mean = T,filename ='rot.gri',overwrite=TRUE)
@@ -93,7 +94,7 @@ plot(predictions[[1:7]],)
 
 #---------------ensemble methord----------
 
-en1 <- ensemble(m,bioc_hfp,filename='en1.img',
+ensemble_only_presence <- ensemble(m,bioc_hfp,filename='ensemble_only_presence.img',
                 setting=list(method='unweighted',stat='tss',opt=2),overwrite = T)
 
 
@@ -104,8 +105,8 @@ cl <- colorRampPalette(c('#3E49BB','#3498DB','yellow','orange','red','darkred'))
 
 
 # mapview(en1)
-plot(en1,col=cl(200))  
-points(disease_point,cex=1,pch='*',col='black')
+plot(ensemble_only_presence,col=cl(200))  
+points(presence_data,cex=1,pch='*',col='black')
 
 
 
